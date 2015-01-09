@@ -29,11 +29,11 @@ import java.util.Date;
 public class DPSTimeData {
     
     public static void main(String[] args) throws IOException, DeviceException {
-        //TimeDataTest();
+        TimeDataTest();
        //writeTest();
-        int[] randomSend= RandomReadTest();
-        int sendCode=decodeSend(111, 96, randomSend);
-        System.out.println(sendCode);
+//        int[] randomSend= RandomReadTest();
+//        int sendCode=decodeSend(111, 96, randomSend);
+//        System.out.println(sendCode);
         
     }
     
@@ -53,10 +53,10 @@ public class DPSTimeData {
         System.out.println("APD2: " + APD2List.size() / 60 + "\t" + APD2List.size());
          
        // writeTxt(GPSList,new String("GPS"));
-        writeTxt(SyncList,new String("Sync"));
+       // writeTxt(SyncList,new String("Sync"));
        // writeTxt(APD1List,new String("APD1"));
-        APDwriteTxt(SyncList,APD1List,new String("APD1"));
-        //APDwriteTxt(SyncList,APD2List,new String("APD2"));
+        APDwriteTxt(SyncList,APD1List,new String("APD1"),98575000);
+        APDwriteTxt(SyncList,APD2List,new String("APD2"),98575000);
        
         
         
@@ -86,47 +86,55 @@ public class DPSTimeData {
             out.close(); // 最后记得关闭文件  
         } 
     
-     public static void APDwriteTxt(TimeEventList list1,TimeEventList list2, String s) throws IOException{
+     public static void APDwriteTxt(TimeEventList list1,TimeEventList list2, String s,int DelayTime) throws IOException{
         Date dt = new Date();
         SimpleDateFormat sdt =  new SimpleDateFormat("yyyyMMddHHmmss");
         String date = sdt.format(dt);
         int APDIndex=0;
-        int DelayTime = 98575000;
+        int Code1_count=0;
+        int Code0_count=0;
+        int Error_count=0;
+       // int DelayTime = 98575000;
+        int[] randomSend= RandomReadTest();
      File writename = new File("G:\\DPS数据处理\\DPS实验数据\\数据处理TXT\\"+s+" "+date+".txt"); // 相对路径，如果没有则要建立一个新的output。txt文件  
             writename.createNewFile(); // 创建新文件  
             BufferedWriter out = new BufferedWriter(new FileWriter(writename));
             out.write(s+"\r\n");
-            for(int i=0;i<list1.size();i++){
+            for(int i=0;i<10000;i++){
                 long APDTime=list2.get(APDIndex).getTime();
                 long SyncTime=list1.get(i).getTime();
-                out.write("Sync round "+i+"\r\n");
+               // out.write("Sync round "+i+"\r\n");
                 while(APDTime<(SyncTime+DelayTime)){
                      APDIndex++;
                       if(APDIndex>=list2.size()){break;}
                      APDTime=list2.get(APDIndex).getTime();
                 }
-            while(APDTime<(SyncTime+DelayTime+256000)){
+           // while(APDTime<(SyncTime+DelayTime+256000)){
                 
                     for (int j = 0; j < 128; j++) {
+                      
                          APDTime=list2.get(APDIndex).getTime();
                           while(APDTime<SyncTime+DelayTime+j*2000)
                         {
-                             
-                          //  System.out.println("---------------");
-                        out.write(APDTime +"\t"+j+"\r\n");//将时间数据写入TXT文件
+                            if(j>=15){
+                             int sendCode=decodeSend(j, j-15, randomSend);
+                             if(sendCode==1)
+                                 Code1_count++;
+                             else
+                                 Code0_count++;
+                             out.write("Round: "+i+"\t"+"Time: "+APDTime +"\t"+"LightPulse: "+j+"\t"+"SendCode: "+sendCode+"\r\n");//将时间数据写入TXT文件
+                            }else{ Error_count++;
+                                out.write("Round: "+i+"\t"+"Time: "+APDTime +"\t"+"LightPulse: "+j+"\t"+"ERROR"+"\t"+"\r\n");};
                         APDIndex++;
                          if(APDIndex>=list2.size()){break;}
                         APDTime=list2.get(APDIndex).getTime();
-                       // out.flush();
                         } ;
+                       
                     }
-                }
-                   
-               // if(APDIndex>=list2.size()){break;}
-            // System.out.println("GPS: " + GPSList.get(i) + "\t" );  
-            
+           
             if(APDIndex>=list2.size()){break;}
         } 
+            out.write("Code 1 count:"+Code1_count+"\t"+"Code 0 count:"+Code0_count+"\t"+"Pulse Error: "+Error_count);
             out.flush(); // 把缓存区内容压入文件  
             out.close(); // 最后记得关闭文件  
      }
