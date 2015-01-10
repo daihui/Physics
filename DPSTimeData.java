@@ -31,22 +31,22 @@ public class DPSTimeData {
     public static void main(String[] args) throws IOException, DeviceException {
         TimeDataTest();
        //writeTest();
-//        int[] randomSend= RandomReadTest();
+       // int[] randomSend= RandomReadTest();
 //        int sendCode=decodeSend(111, 96, randomSend);
 //        System.out.println(sendCode);
         
     }
     
     public static void TimeDataTest() throws IOException, DeviceException{
-        File pxiFile = new File("G:\\DPS数据处理\\DPS实验数据\\2015-1-8\\recive\\20150108210845-R-APD1-1_时间测量数据.dat");
+        File pxiFile = new File("G:\\DPS数据处理\\DPS实验数据\\2015-1-8\\receive\\20150108211115-R-APD2-2_时间测量数据.dat");
         File caliFile = null;
         TimeEventLoader pxiLoader = new PXI40PS1Loader(pxiFile, caliFile);
         TimeEventSegment pxiSegment = TimeEventDataManager.loadTimeEventSegment(pxiLoader);
         
         TimeEventList GPSList = pxiSegment.getEventList(0);
         TimeEventList SyncList = pxiSegment.getEventList(1);
-        TimeEventList APD1List = pxiSegment.getEventList(2);
-        TimeEventList APD2List = pxiSegment.getEventList(3);
+        TimeEventList APD2List = pxiSegment.getEventList(2);
+        TimeEventList APD1List = pxiSegment.getEventList(3);
         System.out.println("GPS: " + GPSList.size() / 60 + "\t" + GPSList.size());
         System.out.println("Sync: " + SyncList.size() / 60 + "\t" + SyncList.size());
         System.out.println("APD1: " + APD1List.size() / 60 + "\t" + APD1List.size());
@@ -55,8 +55,8 @@ public class DPSTimeData {
        // writeTxt(GPSList,new String("GPS"));
        // writeTxt(SyncList,new String("Sync"));
        // writeTxt(APD1List,new String("APD1"));
-        APDwriteTxt(SyncList,APD1List,new String("APD1"),98575000);
-        APDwriteTxt(SyncList,APD2List,new String("APD2"),98575000);
+        APDwriteTxt(SyncList,APD1List,APD2List,new String("APD 数据分析"),98575000);
+        //APDwriteTxt(SyncList,APD2List,new String("APD2"),98575000);
        
         
         
@@ -74,7 +74,7 @@ public class DPSTimeData {
         Date dt = new Date();
         SimpleDateFormat sdt =  new SimpleDateFormat("yyyyMMddHHmmss");
         String date = sdt.format(dt);
-     File writename = new File("G:\\DPS数据处理\\DPS实验数据\\数据处理TXT\\"+s+" "+date+".txt"); // 相对路径，如果没有则要建立一个新的output。txt文件  
+        File writename = new File("G:\\DPS数据处理\\DPS实验数据\\数据处理TXT\\"+s+" "+date+".txt"); // 相对路径，如果没有则要建立一个新的output。txt文件  
             writename.createNewFile(); // 创建新文件  
             BufferedWriter out = new BufferedWriter(new FileWriter(writename));
             out.write(s+"\r\n");
@@ -86,57 +86,109 @@ public class DPSTimeData {
             out.close(); // 最后记得关闭文件  
         } 
     
-     public static void APDwriteTxt(TimeEventList list1,TimeEventList list2, String s,int DelayTime) throws IOException{
+     public static void APDwriteTxt(TimeEventList SyncList,TimeEventList APD1_List,TimeEventList APD2_List, String s,int DelayTime) throws IOException{
+         
         Date dt = new Date();
         SimpleDateFormat sdt =  new SimpleDateFormat("yyyyMMddHHmmss");
         String date = sdt.format(dt);
-        int APDIndex=0;
-        int Code1_count=0;
-        int Code0_count=0;
-        int Error_count=0;
-       // int DelayTime = 98575000;
+        
+        int APD1_Index=0,APD2_Index=0;
+        int APD1_Code1_count=0, APD2_Code1_count=0;
+        int APD1_Code0_count=0, APD2_Code0_count=0;
+        int APD1_PositionErrorCount=0, APD2_PositionErrorCount=0;
+        int APD1_PulseCountError=0, APD2_PulseCountError=0;
         int[] randomSend= RandomReadTest();
-     File writename = new File("G:\\DPS数据处理\\DPS实验数据\\数据处理TXT\\"+s+" "+date+".txt"); // 相对路径，如果没有则要建立一个新的output。txt文件  
+        
+        File writename = new File("G:\\DPS数据处理\\DPS实验数据\\数据处理TXT\\"+s+" "+date+".txt"); // 相对路径，如果没有则要建立一个新的output。txt文件  
             writename.createNewFile(); // 创建新文件  
             BufferedWriter out = new BufferedWriter(new FileWriter(writename));
             out.write(s+"\r\n");
-            for(int i=0;i<10000;i++){
-                long APDTime=list2.get(APDIndex).getTime();
-                long SyncTime=list1.get(i).getTime();
+            for(int i=0;i<15000;i++){
+                //大round循环
+                long APD1_Time=APD1_List.get(APD1_Index).getTime();
+                long APD2_Time=APD2_List.get(APD2_Index).getTime();
+                long SyncTime=SyncList.get(i).getTime();
+                int Count1=0,Count2=0;
                // out.write("Sync round "+i+"\r\n");
-                while(APDTime<(SyncTime+DelayTime)){
-                     APDIndex++;
-                      if(APDIndex>=list2.size()){break;}
-                     APDTime=list2.get(APDIndex).getTime();
-                }
+                while(APD1_Time<(SyncTime+DelayTime)){
+                   //找到此round 中APD1时间事件的第一个脉冲;
+                     APD1_Index++;
+                      if(APD1_Index>=APD1_List.size()){break;}
+                     APD1_Time=APD1_List.get(APD1_Index).getTime();
+                };
+                while(APD2_Time<(SyncTime+DelayTime)){
+                   // 找到此round 中APD2时间事件的第一个脉冲;;
+                     APD2_Index++;
+                      if(APD2_Index>=APD2_List.size()){break;}
+                     APD2_Time=APD2_List.get(APD2_Index).getTime();
+                };
            // while(APDTime<(SyncTime+DelayTime+256000)){
                 
                     for (int j = 0; j < 128; j++) {
-                      
-                         APDTime=list2.get(APDIndex).getTime();
-                          while(APDTime<SyncTime+DelayTime+j*2000)
+                        //记录128个脉冲的时间事件位置
+                         APD1_Time=APD1_List.get(APD1_Index).getTime();
+                         APD2_Time=APD2_List.get(APD2_Index).getTime();
+                      // System.out.println(1);
+                          while(APD1_Time<(SyncTime+DelayTime+j*2000))
                         {
-                            if(j>=15){
+                           // APD1位置标记;
+                           Count1++;
+                           APD1_Index++;
+                           APD1_Time=APD1_List.get(APD1_Index).getTime();
+                        } ;
+                        
+                         while(APD2_Time<(SyncTime+DelayTime+j*2000))
+                        {
+                          // APD2位置标记;
+                           Count2++;
+                           APD2_Index++;
+                           APD2_Time=APD2_List.get(APD2_Index).getTime();
+                        } ;
+                        
+                         if((Count1==1)&&(j>=15)){
+                             int sendCode=decodeSend(j, j-15, randomSend);
+                             Count1=0;
+                             if(sendCode==1)
+                                 APD1_Code1_count++;
+                             else
+                                 APD1_Code0_count++;
+                             out.write("1 Round: "+i+"\t"+"Time: "+APD1_Time/1000 +"\t"+"LightPulse: "+j+"\t"+"SendCode: "+sendCode+"\r\n");
+                             //将时间数据与位置记录写入TXT文件
+                            }
+                         else if(Count1==1&&j<15){ 
+                             Count1=0;
+                             APD1_PositionErrorCount++;
+                             out.write("1 Round: "+i+"\t"+"Time: "+APD1_Time/1000+"\t"+"LightPulse: "+j+"\t"+"PositionErrorCount"+"\t"+"\r\n");
+                            };
+                        if(Count1>1){APD1_PulseCountError++;Count1=0;};
+                        
+                        if((Count2==1)&&(j>=15)){
+                            Count2=0;
                              int sendCode=decodeSend(j, j-15, randomSend);
                              if(sendCode==1)
-                                 Code1_count++;
+                                 APD2_Code1_count++;
                              else
-                                 Code0_count++;
-                             out.write("Round: "+i+"\t"+"Time: "+APDTime +"\t"+"LightPulse: "+j+"\t"+"SendCode: "+sendCode+"\r\n");//将时间数据写入TXT文件
-                            }else{ Error_count++;
-                                out.write("Round: "+i+"\t"+"Time: "+APDTime +"\t"+"LightPulse: "+j+"\t"+"ERROR"+"\t"+"\r\n");};
-                        APDIndex++;
-                         if(APDIndex>=list2.size()){break;}
-                        APDTime=list2.get(APDIndex).getTime();
-                        } ;
-                       
+                                 APD2_Code0_count++;
+                             out.write("2 Round: "+i+"\t"+"Time: "+APD2_Time/1000 +"\t"+"LightPulse: "+j+"\t"+"SendCode: "+sendCode+"\r\n");//将时间数据写入TXT文件
+                            }
+                         else if(Count2==1&&j<15){ 
+                             Count2=0;
+                             APD2_PositionErrorCount++;
+                             out.write("2 Round: "+i+"\t"+"Time: "+APD2_Time/1000 +"\t"+"LightPulse: "+j+"\t"+"PositionErrorCount"+"\t"+"\r\n");
+                            };
+                        if(Count2>1){APD2_PulseCountError++;Count2=0;};
+                     
+                        if(APD1_Index>=APD1_List.size()|APD2_Index>=APD2_List.size()){break;}
+
                     }
            
-            if(APDIndex>=list2.size()){break;}
+            if(APD1_Index>=APD1_List.size()|APD2_Index>=APD2_List.size()){break;}
         } 
-            out.write("Code 1 count:"+Code1_count+"\t"+"Code 0 count:"+Code0_count+"\t"+"Pulse Error: "+Error_count);
+            out.write("APD1: Code 1 count:"+APD1_Code1_count+"\t"+"Code 0 count:"+APD1_Code0_count+"\t"+"Position Error: "+APD1_PositionErrorCount+"\t"+"Count Error: "+APD1_PulseCountError+"\r\n");
+            out.write("APD2: Code 1 count:"+APD2_Code1_count+"\t"+"Code 0 count:"+APD2_Code0_count+"\t"+"Position Error: "+APD2_PositionErrorCount+"\t"+"Count Error: "+APD2_PulseCountError+"\r\n");
+            //写入编码统计数据、脉冲位置误码、光子计数误码
             out.flush(); // 把缓存区内容压入文件  
-            out.close(); // 最后记得关闭文件  
+            out.close(); // 关闭文件  
      }
            
     public static int[] RandomReadTest() throws FileNotFoundException, IOException {
@@ -144,7 +196,7 @@ public class DPSTimeData {
          Date dt = new Date();
         SimpleDateFormat sdt =  new SimpleDateFormat("yyyyMMddHHmmss");
         String date = sdt.format(dt);
-        File randomdata = new File("G:\\DPS数据处理\\DPS实验数据\\2015-1-8\\send\\20150108210845apd1s01_随机数.dat");
+        File randomdata = new File("G:\\DPS数据处理\\DPS实验数据\\2015-1-8\\send\\20150108211115apd2s01_随机数.dat");
         File randomdatTXT =new File("G:\\DPS数据处理\\DPS实验数据\\数据处理TXT\\"+date+"sendRandomdata.txt");
         FileInputStream in = new FileInputStream(randomdata);  
                 DataInputStream dis=new DataInputStream(in); 
@@ -153,9 +205,9 @@ public class DPSTimeData {
                 
                 dis.read(b, 0, 16);
                 for (int i = 0; i < 128; i++) {
-                    if(((b[(i/8)] >>> (i % 8))&0x01)==0x01){
-                        randomList[i]=1;
-                    }else randomList[i]=0;
+                    if(((b[(i/8)] >>> (7-(i % 8)))&0x01)==0x01){
+                        randomList[i]=0;
+                    }else randomList[i]=1;
                     
                 }
           randomdatTXT.createNewFile(); // 创建新文件  
