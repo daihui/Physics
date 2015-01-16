@@ -11,7 +11,6 @@ import com.hwaipy.unifieddeviceinterface.timeeventdevice.data.TimeEventLoader;
 import com.hwaipy.unifieddeviceinterface.timeeventdevice.pxi40ps1data.PXI40PS1Loader;
 import com.hwaipy.unifieddeviceinterface.timeeventdevice.timeeventcontainer.TimeEventList;
 import com.hwaipy.unifieddeviceinterface.timeeventdevice.timeeventcontainer.TimeEventSegment;
-import com.sun.scenario.effect.Offset;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
@@ -29,8 +28,16 @@ import java.util.Date;
 public class DPSTimeData {
 
     public static void main(String[] args) throws IOException, DeviceException {
+        final File SendTDFIle = new File("G:\\DPS数据处理\\DPS实验数据\\2015-1-15\\send\\20150115121232-s-真随机数9_随机数_时间测量数据.dat");
+        final File ReceiveTDFile = new File("G:\\DPS数据处理\\DPS实验数据\\2015-1-15\\receive\\20150115121232-R-真随机-APD1小-9_时间测量数据.dat");
+        final File SendRFile = new File("G:\\DPS数据处理\\DPS实验数据\\2015-1-15\\send\\20150115121232-s-真随机数9_随机数_随机数.dat");
+        final File ReceiveRFile = null;
+        final int APD1DelayTime = 98589100;
+        final int APD2DelayTime = 98581850;
+        final int TimeGate = 800;
+
         //TimeDataTestMode();
-        TimeData();
+        TimeData(SendTDFIle, ReceiveTDFile, SendRFile, ReceiveRFile, APD1DelayTime, APD2DelayTime, TimeGate);
         //writeTest();
         // int[] randomSend= RandomReadTest();
 //        int sendCode=decodeSend(111, 96, randomSend);
@@ -38,8 +45,8 @@ public class DPSTimeData {
 
     }
 
-    public static void TimeData() throws IOException, DeviceException {
-        File pxiFileR = new File("G:\\DPS数据处理\\DPS实验数据\\2015-1-15\\receive\\20150115121232-R-真随机-APD1小-9_时间测量数据.dat");
+    public static void TimeData(File SendTimeDataFile, File ReceiveTimeDataFile, File SendRandomFile, File ReceiveRandomFile, int APD1DelayTime, int APD2DelayTime, int Timegate) throws IOException, DeviceException {
+        File pxiFileR = ReceiveTimeDataFile;
         File caliFileR = null;
         TimeEventLoader pxiLoaderR = new PXI40PS1Loader(pxiFileR, caliFileR);
         TimeEventSegment pxiSegmentR = TimeEventDataManager.loadTimeEventSegment(pxiLoaderR);
@@ -49,7 +56,7 @@ public class DPSTimeData {
         TimeEventList APD1ListR = pxiSegmentR.getEventList(2);
         TimeEventList APD2ListR = pxiSegmentR.getEventList(3);
 
-        File pxiFileS = new File("G:\\DPS数据处理\\DPS实验数据\\2015-1-15\\send\\20150115121232-s-真随机数9_随机数_时间测量数据.dat");
+        File pxiFileS = SendTimeDataFile;
         File caliFileS = null;
         TimeEventLoader pxiLoaderS = new PXI40PS1Loader(pxiFileS, caliFileS);
         TimeEventSegment pxiSegmentS = TimeEventDataManager.loadTimeEventSegment(pxiLoaderS);
@@ -67,7 +74,7 @@ public class DPSTimeData {
         // writeTxt(GPSList,new String("GPS"));
 //        writeTxt(SyncListR, "Receive Sync");
 //        writeTxt(SyncListS, "Send Sync");
-        APDwriteTxt(SyncListS, SyncListR, APD1ListR, APD2ListR, "APD 数据分析", 98589100, 98581850, 800);
+        APDwriteTxt(SendRandomFile, SyncListS, SyncListR, APD1ListR, APD2ListR, "APD 数据分析", APD1DelayTime, APD2DelayTime, Timegate);
         //APDwriteTxt(SyncList,APD2List,new String("APD2"),98575000);
 
 //        for(int i=0;i<SyncList.size();i++){
@@ -95,7 +102,7 @@ public class DPSTimeData {
         out.close(); // 最后记得关闭文件  
     }
 
-    public static void APDwriteTxt(TimeEventList SyncListS, TimeEventList SyncListR, TimeEventList APD1_List, TimeEventList APD2_List, String s, int DelayTime1, int DelayTime2, int TimeGate) throws IOException {
+    public static void APDwriteTxt(File SendRandomFile, TimeEventList SyncListS, TimeEventList SyncListR, TimeEventList APD1_List, TimeEventList APD2_List, String s, int DelayTime1, int DelayTime2, int TimeGate) throws IOException {
 
         Date dt = new Date();
         SimpleDateFormat sdt = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -110,7 +117,7 @@ public class DPSTimeData {
         int SyncIndexOffset = 0;
         int SyncRound = 0;
 
-        File randomdata = new File("G:\\DPS数据处理\\DPS实验数据\\2015-1-15\\send\\20150115121232-s-真随机数9_随机数_随机数.dat");
+        File randomdata = SendRandomFile;
         FileInputStream randomDataIn = new FileInputStream(randomdata);
         DataInputStream randomData = new DataInputStream(randomDataIn);
 
@@ -339,10 +346,10 @@ public class DPSTimeData {
         int SendOffset = 0;
         //long DTime=0;
         while (Math.abs(STime - RTime) > 300000) {
-            if((STime-RTime)>50000000){
-                SendOffset=-1;
+            if ((STime - RTime) > 50000000) {
+                SendOffset = -1;
                 // System.out.println("Receive Sync fail! " +  "\t" + "Receive Sync Time: " + RTime);
-                 break;
+                break;
             }
             indexSend++;
             SendOffset++;
@@ -350,7 +357,7 @@ public class DPSTimeData {
                 break;
             }
             STime = SyncListS.get(indexSend).getTime();
-           // System.out.println("Send Sync Time: " + STime + "\t" + "Receive Sync Time: " + RTime);
+            // System.out.println("Send Sync Time: " + STime + "\t" + "Receive Sync Time: " + RTime);
         }
         return SendOffset;
     }
