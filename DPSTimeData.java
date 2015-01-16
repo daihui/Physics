@@ -30,7 +30,7 @@ public class DPSTimeData {
 
     public static void main(String[] args) throws IOException, DeviceException {
         //TimeDataTestMode();
-       TimeData();
+        TimeData();
         //writeTest();
         // int[] randomSend= RandomReadTest();
 //        int sendCode=decodeSend(111, 96, randomSend);
@@ -39,24 +39,35 @@ public class DPSTimeData {
     }
 
     public static void TimeData() throws IOException, DeviceException {
-        File pxiFile = new File("G:\\DPS数据处理\\DPS实验数据\\2015-1-14\\send\\20150114164956-s-7_时间测量数据.dat");
-        File caliFile = null;
-        TimeEventLoader pxiLoader = new PXI40PS1Loader(pxiFile, caliFile);
-        TimeEventSegment pxiSegment = TimeEventDataManager.loadTimeEventSegment(pxiLoader);
+        File pxiFileR = new File("G:\\DPS数据处理\\DPS实验数据\\2015-1-15\\receive\\20150115121232-R-真随机-APD1小-9_时间测量数据.dat");
+        File caliFileR = null;
+        TimeEventLoader pxiLoaderR = new PXI40PS1Loader(pxiFileR, caliFileR);
+        TimeEventSegment pxiSegmentR = TimeEventDataManager.loadTimeEventSegment(pxiLoaderR);
 
-        TimeEventList GPSList = pxiSegment.getEventList(0);
-        TimeEventList SyncList = pxiSegment.getEventList(1);
-        TimeEventList APD1List = pxiSegment.getEventList(2);
-        TimeEventList APD2List = pxiSegment.getEventList(3);
-        System.out.println("GPS: " + GPSList.size() / 60 + "\t" + GPSList.size());
-        System.out.println("Sync: " + SyncList.size() / 60 + "\t" + SyncList.size());
-        System.out.println("APD1: " + APD1List.size() / 60 + "\t" + APD1List.size());
-        System.out.println("APD2: " + APD2List.size() / 60 + "\t" + APD2List.size());
+        TimeEventList GPSListR = pxiSegmentR.getEventList(0);
+        TimeEventList SyncListR = pxiSegmentR.getEventList(1);
+        TimeEventList APD1ListR = pxiSegmentR.getEventList(2);
+        TimeEventList APD2ListR = pxiSegmentR.getEventList(3);
+
+        File pxiFileS = new File("G:\\DPS数据处理\\DPS实验数据\\2015-1-15\\send\\20150115121232-s-真随机数9_随机数_时间测量数据.dat");
+        File caliFileS = null;
+        TimeEventLoader pxiLoaderS = new PXI40PS1Loader(pxiFileS, caliFileS);
+        TimeEventSegment pxiSegmentS = TimeEventDataManager.loadTimeEventSegment(pxiLoaderS);
+
+        TimeEventList GPSListS = pxiSegmentS.getEventList(0);
+        TimeEventList SyncListS = pxiSegmentS.getEventList(1);
+
+        System.out.println("Send GPS: " + GPSListS.size() / 60 + "\t" + GPSListS.size());
+        System.out.println("Send Sync: " + SyncListS.size() / 60 + "\t" + SyncListS.size());
+        System.out.println("Receive GPS: " + GPSListR.size() / 60 + "\t" + GPSListR.size());
+        System.out.println("Receive Sync: " + SyncListR.size() / 60 + "\t" + SyncListR.size());
+        System.out.println("APD1: " + APD1ListR.size() / 60 + "\t" + APD1ListR.size());
+        System.out.println("APD2: " + APD2ListR.size() / 60 + "\t" + APD2ListR.size());
 
         // writeTxt(GPSList,new String("GPS"));
-         writeTxt(SyncList,new String("Sync"));
-        // writeTxt(APD1List,new String("APD1"));
-        //APDwriteTxt(SyncList, APD1List, APD2List, "APD 数据分析", 98581200, 98574300, 1000);
+//        writeTxt(SyncListR, "Receive Sync");
+//        writeTxt(SyncListS, "Send Sync");
+        APDwriteTxt(SyncListS, SyncListR, APD1ListR, APD2ListR, "APD 数据分析", 98589100, 98581850, 800);
         //APDwriteTxt(SyncList,APD2List,new String("APD2"),98575000);
 
 //        for(int i=0;i<SyncList.size();i++){
@@ -84,7 +95,7 @@ public class DPSTimeData {
         out.close(); // 最后记得关闭文件  
     }
 
-    public static void APDwriteTxt(TimeEventList SyncList, TimeEventList APD1_List, TimeEventList APD2_List, String s, int DelayTime1, int DelayTime2, int TimeGate) throws IOException {
+    public static void APDwriteTxt(TimeEventList SyncListS, TimeEventList SyncListR, TimeEventList APD1_List, TimeEventList APD2_List, String s, int DelayTime1, int DelayTime2, int TimeGate) throws IOException {
 
         Date dt = new Date();
         SimpleDateFormat sdt = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -96,8 +107,10 @@ public class DPSTimeData {
         int APD1_PositionErrorCount = 0, APD2_PositionErrorCount = 0;
         int APD1_PulseCountError = 0, APD2_PulseCountError = 0;
         int CodeError = 0;
+        int SyncIndexOffset = 0;
+        int SyncRound = 0;
 
-        File randomdata = new File("G:\\DPS数据处理\\DPS实验数据\\2015-1-14\\send\\20150114164956-s-7_随机数.dat");
+        File randomdata = new File("G:\\DPS数据处理\\DPS实验数据\\2015-1-15\\send\\20150115121232-s-真随机数9_随机数_随机数.dat");
         FileInputStream randomDataIn = new FileInputStream(randomdata);
         DataInputStream randomData = new DataInputStream(randomDataIn);
 
@@ -111,17 +124,33 @@ public class DPSTimeData {
         BufferedWriter code = new BufferedWriter(new FileWriter(codewrite));
         code.write("接收端成码 " + "\t" + "发射端编码 " + "\r\n");
 
-        for (int i = 0; i < 20000; i++) {
+        if (SyncListS.size() >= SyncListR.size()) {
+            SyncRound = (SyncListR.size());
+        } else {
+            SyncRound = (SyncListS.size());
+        }
+
+        for (int i = 0; i < 7000; i++) {
             //大round循环
-            int[] randomSend = RandomRead(randomData, 0, 16);//读取此round的发射端随机数
+
             long APD1_Time = APD1_List.get(APD1_Index).getTime();
             long APD2_Time = APD2_List.get(APD2_Index).getTime();
-            long SyncTime = SyncList.get(i).getTime();
+            long SyncTimeR = SyncListR.get(i).getTime();
             int Count1 = 0, Count2 = 0;
             int PulsePosition1 = 0, PulsePosition2 = 0;
             boolean Singal1 = false, Singal2 = false;
+            int[] randomSend = new int[128];
+            int SendOffset = 0;
             // out.write("Sync round "+i+"\r\n");
-            while (APD1_Time < (SyncTime + DelayTime1)) {
+            if ((i + SyncIndexOffset) > SyncListS.size()) {
+                break;
+            }
+            SendOffset = TimeSync(SyncListS, SyncListR, i + SyncIndexOffset, i);
+            SyncIndexOffset += SendOffset;
+            for (int index = 0; index <= SendOffset; index++) {
+                randomSend = RandomRead(randomData, 0, 16);//读取此round的发射端随机数
+            }
+            while (APD1_Time < (SyncTimeR + DelayTime1)) {
                 //找到此round 中APD1时间事件的第一个脉冲;
                 APD1_Index++;
                 if (APD1_Index >= APD1_List.size()) {
@@ -129,7 +158,7 @@ public class DPSTimeData {
                 }
                 APD1_Time = APD1_List.get(APD1_Index).getTime();
             };
-            while (APD2_Time < (SyncTime + DelayTime2)) {
+            while (APD2_Time < (SyncTimeR + DelayTime2)) {
                 // 找到此round 中APD2时间事件的第一个脉冲;;
                 APD2_Index++;
                 if (APD2_Index >= APD2_List.size()) {
@@ -147,9 +176,9 @@ public class DPSTimeData {
                 APD1_Time = APD1_List.get(APD1_Index).getTime();
                 APD2_Time = APD2_List.get(APD2_Index).getTime();
                 // System.out.println(1);
-                while (APD1_Time < (SyncTime + DelayTime1 + j * 2000)) {
+                while (APD1_Time < (SyncTimeR + DelayTime1 + j * 2000)) {
                     // APD1位置标记;
-                    if (APD1_Time > (SyncTime + DelayTime1 + j * 2000 - 1000 - 0.5 * TimeGate) && (APD1_Time < (SyncTime + DelayTime1 + j * 2000 - 1000 + 0.5 * TimeGate))) {
+                    if (APD1_Time > (SyncTimeR + DelayTime1 + j * 2000 - 1000 - 0.5 * TimeGate) && (APD1_Time < (SyncTimeR + DelayTime1 + j * 2000 - 1000 + 0.5 * TimeGate))) {
                         PulsePosition1 = j;
                         Count1++;
                     }
@@ -162,9 +191,9 @@ public class DPSTimeData {
 
                 };
 
-                while (APD2_Time < (SyncTime + DelayTime2 + j * 2000)) {
+                while (APD2_Time < (SyncTimeR + DelayTime2 + j * 2000)) {
                     // APD2位置标记;
-                    if (APD2_Time > (SyncTime + DelayTime2 + j * 2000 - 1000 - 0.5 * TimeGate) && (APD2_Time < (SyncTime + DelayTime2 + j * 2000 - 1000 + 0.5 * TimeGate))) {
+                    if (APD2_Time > (SyncTimeR + DelayTime2 + j * 2000 - 1000 - 0.5 * TimeGate) && (APD2_Time < (SyncTimeR + DelayTime2 + j * 2000 - 1000 + 0.5 * TimeGate))) {
                         PulsePosition2 = j;
                         Count2++;
                     }
@@ -303,6 +332,29 @@ public class DPSTimeData {
         return randomList;
     }
 
+    public static int TimeSync(TimeEventList SyncListS, TimeEventList SyncListR, int indexS, int indexR) {
+        int indexSend = indexS;
+        long STime = SyncListS.get(indexSend).getTime();
+        long RTime = SyncListR.get(indexR).getTime();
+        int SendOffset = 0;
+        //long DTime=0;
+        while (Math.abs(STime - RTime) > 300000) {
+            if((STime-RTime)>50000000){
+                SendOffset=-1;
+                // System.out.println("Receive Sync fail! " +  "\t" + "Receive Sync Time: " + RTime);
+                 break;
+            }
+            indexSend++;
+            SendOffset++;
+            if (indexSend > SyncListS.size()) {
+                break;
+            }
+            STime = SyncListS.get(indexSend).getTime();
+           // System.out.println("Send Sync Time: " + STime + "\t" + "Receive Sync Time: " + RTime);
+        }
+        return SendOffset;
+    }
+
     public static int[] RandomRead(DataInputStream dis, int Offset, int len) throws FileNotFoundException, IOException {
         //提取发射端随机数，存到一个128个元素的整型数组当中
 
@@ -352,25 +404,25 @@ public class DPSTimeData {
         // writeTxt(GPSList,new String("GPS"));
         // writeTxt(SyncList,new String("Sync"));
         // writeTxt(APD1List,new String("APD1"));
-         APDwriteTxtTestMode(SyncList, APD1List, APD2List, "APD 数据分析", 98581200, 98574300,800);
+        APDwriteTxtTestMode(SyncList, APD1List, APD2List, "APD 数据分析", 98581200, 98574300, 800);
         //APDwriteTxt(SyncList,APD2List,new String("APD2"),98575000);
-       // TimeScan(SyncList, APD1List, APD2List, 98579000, 9872500, 200,1000);
-   
+        // TimeScan(SyncList, APD1List, APD2List, 98579000, 9872500, 200,1000);
+
     }
-    
-    public static void TimeScan(TimeEventList SyncList, TimeEventList APD1List,TimeEventList APD2List,int DelayTime1, int DelayTime2,int ScanStep, int TimeGate) throws IOException {
-         int CodeCount = 0;
-        int MaxrCount1 = 0,MaxCount2=0;
+
+    public static void TimeScan(TimeEventList SyncList, TimeEventList APD1List, TimeEventList APD2List, int DelayTime1, int DelayTime2, int ScanStep, int TimeGate) throws IOException {
+        int CodeCount = 0;
+        int MaxrCount1 = 0, MaxCount2 = 0;
         int index1 = 0, index2 = 0;
         for (int i = 0; i < 20; i++) {
             System.out.println("APD2 Time Scan: " + i);
             CodeCount = APDwriteTxtTestMode(SyncList, APD1List, APD2List, "APD 数据分析", DelayTime1, DelayTime2 + i * ScanStep, TimeGate);
             if (MaxCount2 < CodeCount) {
-                MaxCount2= CodeCount;
+                MaxCount2 = CodeCount;
                 index2 = i;
             }
         }
-        
+
         for (int i = 0; i < 20; i++) {
             System.out.println("APD1 Time Scan: " + i);
             CodeCount = APDwriteTxtTestMode(SyncList, APD1List, APD2List, "APD 数据分析", DelayTime1 + i * ScanStep, DelayTime2, TimeGate);
@@ -381,8 +433,8 @@ public class DPSTimeData {
             }
         }
 
-        System.out.println("APD1 DelayTime: " + (DelayTime1 + index1 * ScanStep) + "\t" +"CodeCount: "+MaxrCount1+"\t"+ "APD2 DelayTime: " + (DelayTime2 + index2 * ScanStep) + "\t" +"CodeCount: "+MaxCount2);
-        
+        System.out.println("APD1 DelayTime: " + (DelayTime1 + index1 * ScanStep) + "\t" + "CodeCount: " + MaxrCount1 + "\t" + "APD2 DelayTime: " + (DelayTime2 + index2 * ScanStep) + "\t" + "CodeCount: " + MaxCount2);
+
     }
 
     public static int APDwriteTxtTestMode(TimeEventList SyncList, TimeEventList APD1_List, TimeEventList APD2_List, String s, int DelayTime1, int DelayTime2, int TimeGate) throws IOException {
@@ -563,7 +615,7 @@ public class DPSTimeData {
         System.out.println("APD1: Code 1 count:" + APD1_Code1_count + "\t" + "Code 0 count:" + APD1_Code0_count + "\t" + "Position Error: " + APD1_PositionErrorCount + "\t" + "Count Error: " + APD1_PulseCountError + "\r\n");
         System.out.println("APD2: Code 1 count:" + APD2_Code1_count + "\t" + "Code 0 count:" + APD2_Code0_count + "\t" + "Position Error: " + APD2_PositionErrorCount + "\t" + "Count Error: " + APD2_PulseCountError + "\r\n");
         System.out.println("Total Code Count: " + (APD1_Code0_count + APD1_Code1_count + APD2_Code0_count + APD2_Code1_count) + " Error Code Count: " + CodeError + "\r\n");
-        return (APD1_Code0_count+APD2_Code1_count);
+        return (APD1_Code0_count + APD2_Code1_count);
     }
 
 }
