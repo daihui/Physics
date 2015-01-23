@@ -6,9 +6,12 @@
 package lightseconddataanalyzer;
 
 import java.io.File;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import static lightseconddataanalyzer.DPSTimeData.TimeData;
+import javax.swing.text.JTextComponent;
 
 /**
  *
@@ -67,13 +70,43 @@ public class DPSJFrame extends javax.swing.JFrame {
     private File ReceiveTimeDataFile;
     private File SendRandomDataFile;
     private File ReceiveRandomDataFile;
-  
+
     /**
      * Creates new form DPSJFrame
      */
     public DPSJFrame() {
 
         initComponents();
+        System.setOut(new GUIPrintStream(System.out, ResultPrint));
+    }
+
+    public class GUIPrintStream extends PrintStream {
+
+        private JTextComponent component;
+        private StringBuffer sb = new StringBuffer();
+
+        public GUIPrintStream(OutputStream out, JTextComponent component) {
+            super(out);
+            this.component = component;
+        }
+
+        /**
+         * 重写write()方法，将输出信息填充到GUI组件。
+         *
+         * @param buf
+         * @param off
+         * @param len
+         */
+        @Override
+        public void write(byte[] buf, int off, int len) {
+            final String message = new String(buf, off, len);
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    sb.append(message);
+                    component.setText(sb.toString());
+                }
+            });
+        }
     }
 
     /**
@@ -106,6 +139,7 @@ public class DPSJFrame extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
+        jLabel1.setFont(new java.awt.Font("微软雅黑", 0, 18)); // NOI18N
         jLabel1.setText("Click to Choose Data File:");
 
         APD1Delay.addActionListener(new java.awt.event.ActionListener() {
@@ -114,8 +148,10 @@ public class DPSJFrame extends javax.swing.JFrame {
             }
         });
 
+        jLabel5.setFont(new java.awt.Font("微软雅黑 Light", 0, 12)); // NOI18N
         jLabel5.setText("APD1 Delay:");
 
+        jLabel6.setFont(new java.awt.Font("微软雅黑 Light", 0, 12)); // NOI18N
         jLabel6.setText("APD2 Delay:");
 
         APD2Delay.addActionListener(new java.awt.event.ActionListener() {
@@ -124,6 +160,7 @@ public class DPSJFrame extends javax.swing.JFrame {
             }
         });
 
+        jLabel7.setFont(new java.awt.Font("微软雅黑 Light", 0, 12)); // NOI18N
         jLabel7.setText("TimeGate:");
 
         TimeGate.addActionListener(new java.awt.event.ActionListener() {
@@ -132,6 +169,7 @@ public class DPSJFrame extends javax.swing.JFrame {
             }
         });
 
+        DataProcess.setFont(new java.awt.Font("微软雅黑", 0, 14)); // NOI18N
         DataProcess.setText("Data Processing");
         DataProcess.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -143,11 +181,13 @@ public class DPSJFrame extends javax.swing.JFrame {
         ResultPrint.setRows(5);
         jScrollPane1.setViewportView(ResultPrint);
 
+        jLabel8.setFont(new java.awt.Font("微软雅黑", 0, 18)); // NOI18N
         jLabel8.setText("Result:");
 
-        jLabel9.setFont(new java.awt.Font("Century", 1, 18)); // NOI18N
+        jLabel9.setFont(new java.awt.Font("Century", 1, 24)); // NOI18N
         jLabel9.setText("RRDPS-QKD Data Processing ");
 
+        SendTimeData.setFont(new java.awt.Font("微软雅黑", 0, 12)); // NOI18N
         SendTimeData.setText("SendTimeData");
         SendTimeData.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -155,6 +195,7 @@ public class DPSJFrame extends javax.swing.JFrame {
             }
         });
 
+        SendRandomData.setFont(new java.awt.Font("微软雅黑", 0, 12)); // NOI18N
         SendRandomData.setText("SendRandomData");
         SendRandomData.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -162,6 +203,7 @@ public class DPSJFrame extends javax.swing.JFrame {
             }
         });
 
+        ReceiveTimeData.setFont(new java.awt.Font("微软雅黑", 0, 12)); // NOI18N
         ReceiveTimeData.setText("ReceiveTimeData");
         ReceiveTimeData.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -169,6 +211,7 @@ public class DPSJFrame extends javax.swing.JFrame {
             }
         });
 
+        ReceiveRandomData.setFont(new java.awt.Font("微软雅黑", 0, 12)); // NOI18N
         ReceiveRandomData.setText("ReceiveRandomData");
         ReceiveRandomData.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -176,8 +219,10 @@ public class DPSJFrame extends javax.swing.JFrame {
             }
         });
 
+        jLabel2.setFont(new java.awt.Font("微软雅黑", 0, 18)); // NOI18N
         jLabel2.setText("Time Setting:");
 
+        TimeSetting.setFont(new java.awt.Font("微软雅黑", 0, 14)); // NOI18N
         TimeSetting.setText("Set Time");
         TimeSetting.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -193,59 +238,55 @@ public class DPSJFrame extends javax.swing.JFrame {
                 .addGap(63, 63, 63)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 789, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 174, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(200, 200, 200)
+                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(10, 10, 10)
+                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(APD1Delay, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(ReceiveTimeData, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(SendTimeData, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                        .addGap(37, 37, 37)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(ReceiveRandomData, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(SendRandomData, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                            .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                                    .addComponent(DataProcess)
-                                                    .addGroup(layout.createSequentialGroup()
-                                                        .addComponent(APD1Delay, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addGap(18, 18, 18)
-                                                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                        .addComponent(APD2Delay, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                                .addGap(18, 18, 18)
-                                                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(TimeGate, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(35, 35, 35)
+                                .addComponent(APD2Delay, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(DataProcess))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(TimeGate, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(77, 77, 77)
                         .addComponent(TimeSetting))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 599, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(25, Short.MAX_VALUE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(82, 82, 82)
+                        .addComponent(SendTimeData, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(SendRandomData)
+                        .addGap(18, 18, 18)
+                        .addComponent(ReceiveTimeData)
+                        .addGap(18, 18, 18)
+                        .addComponent(ReceiveRandomData)))
+                .addContainerGap(118, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(26, 26, 26)
                 .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(26, 26, 26)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(SendTimeData, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(SendRandomData, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(SendRandomData, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(ReceiveTimeData, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(ReceiveRandomData, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(45, 45, 45)
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(2, 2, 2)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -256,13 +297,13 @@ public class DPSJFrame extends javax.swing.JFrame {
                     .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(TimeGate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(TimeSetting, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(29, 29, 29)
+                .addGap(41, 41, 41)
                 .addComponent(DataProcess, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(33, 33, 33)
+                .addGap(21, 21, 21)
                 .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(29, 29, 29))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 252, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(42, 42, 42))
         );
 
         pack();
@@ -282,11 +323,11 @@ public class DPSJFrame extends javax.swing.JFrame {
         SendTimeDataFilechooser.setCurrentDirectory(DataFile);
         SendTimeDataFilechooser.setFileFilter(new FileNameExtensionFilter(".dat", FileType));
         SendTimeDataFilechooser.showOpenDialog(null);
-         setSendTimeDataFile(SendTimeDataFilechooser.getSelectedFile());
+        setSendTimeDataFile(SendTimeDataFilechooser.getSelectedFile());
         if (getSendTimeDataFile() != null) {
             System.out.println(getSendTimeDataFile() + "  File read Sucess!");
-            ResultPrint.setLineWrap(true); 
-            ResultPrint.append(getSendTimeDataFile() + "  File read Sucess!"+"\n");
+            ResultPrint.setLineWrap(true);
+            ResultPrint.append(getSendTimeDataFile() + "  File read Sucess!" + "\n");
         }
     }//GEN-LAST:event_SendTimeDataActionPerformed
 
@@ -297,9 +338,9 @@ public class DPSJFrame extends javax.swing.JFrame {
         SendRandomDataFilechooser.setFileFilter(new FileNameExtensionFilter(".dat", FileType));
         SendRandomDataFilechooser.showOpenDialog(null);
         setSendRandomDataFile(SendRandomDataFilechooser.getSelectedFile());
-        if (getSendRandomDataFile()!= null) {
+        if (getSendRandomDataFile() != null) {
             System.out.println(getSendRandomDataFile() + "  File read Sucess!");
-               ResultPrint.append(getSendTimeDataFile() + "  File read Sucess!"+"\n");
+            ResultPrint.append(getSendTimeDataFile() + "  File read Sucess!" + "\n");
         }
     }//GEN-LAST:event_SendRandomDataActionPerformed
 
@@ -312,7 +353,7 @@ public class DPSJFrame extends javax.swing.JFrame {
         setReceiveTimeDataFile(ReceiveTimeDataFilechooser.getSelectedFile());
         if (getReceiveTimeDataFile() != null) {
             System.out.println(getReceiveTimeDataFile() + "  File read Sucess!");
-               ResultPrint.append(getSendTimeDataFile() + "  File read Sucess!"+"\n");
+            ResultPrint.append(getSendTimeDataFile() + "  File read Sucess!" + "\n");
         }
     }//GEN-LAST:event_ReceiveTimeDataActionPerformed
 
@@ -322,10 +363,10 @@ public class DPSJFrame extends javax.swing.JFrame {
         ReceiveRandomDataFilechooser.setCurrentDirectory(DataFile);
         ReceiveRandomDataFilechooser.setFileFilter(new FileNameExtensionFilter(".dat", FileType));
         ReceiveRandomDataFilechooser.showOpenDialog(null);
-         setReceiveRandomDataFile(ReceiveRandomDataFilechooser.getSelectedFile());
+        setReceiveRandomDataFile(ReceiveRandomDataFilechooser.getSelectedFile());
         if (getReceiveRandomDataFile() != null) {
             System.out.println(getReceiveRandomDataFile() + "  File read Sucess!");
-               ResultPrint.append(getSendTimeDataFile() + "  File read Sucess!"+"\n");
+            ResultPrint.append(getSendTimeDataFile() + "  File read Sucess!" + "\n");
         }
     }//GEN-LAST:event_ReceiveRandomDataActionPerformed
 
@@ -340,15 +381,19 @@ public class DPSJFrame extends javax.swing.JFrame {
         setAPD1DelayTime(Integer.parseInt(APD1Delay.getText()));
         setAPD2DelayTime(Integer.parseInt(APD2Delay.getText()));
         setGateTime(Integer.parseInt(TimeGate.getText()));
-        System.out.println("APD1DelayTime: " + getAPD1DelayTime() + "\t" + "APD1DelayTime: " + getAPD2DelayTime() + "\t" + "GateTime: " + getGateTime());
-        ResultPrint.append("APD1DelayTime: " + getAPD1DelayTime() + "\t" + "APD1DelayTime: " + getAPD2DelayTime() + "\t" + "GateTime: " + getGateTime()+"\n");
+        System.out.println("APD1DelayTime: " + getAPD1DelayTime() + "\t" + "APD2DelayTime: " + getAPD2DelayTime() + "\t" + "GateTime: " + getGateTime());
+        ResultPrint.append("APD1DelayTime: " + getAPD1DelayTime() + "\t" + "APD2DelayTime: " + getAPD2DelayTime() + "\t" + "GateTime: " + getGateTime() + "\n");
     }//GEN-LAST:event_TimeSettingActionPerformed
 
     private void DataProcessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DataProcessActionPerformed
         // TODO add your handling code here:
-        try{
-            TimeData(getSendTimeDataFile(), getReceiveTimeDataFile(), getSendRandomDataFile(), getReceiveRandomDataFile(), getAPD1DelayTime(), getAPD2DelayTime(), getGateTime());
-        }catch(Exception e){};
+        DPSTimeData Process = new DPSTimeData();
+        ResultPrint.append("Processing...");
+        try {
+
+            Process.TimeData(getSendTimeDataFile(), getReceiveTimeDataFile(), getSendRandomDataFile(), getReceiveRandomDataFile(), getAPD1DelayTime(), getAPD2DelayTime(), getGateTime());
+        } catch (Exception e) {
+        };
     }//GEN-LAST:event_DataProcessActionPerformed
 
     /**
