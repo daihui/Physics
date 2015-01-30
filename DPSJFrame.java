@@ -61,15 +61,58 @@ public class DPSJFrame extends javax.swing.JFrame {
         GateTime = aGateTime;
     }
 
+    /**
+     * @return the syncRound
+     */
+    public static int getSyncRound() {
+        return syncRound;
+    }
+
+    /**
+     * @param aSyncRound the syncRound to set
+     */
+    public static void setSyncRound(int aSyncRound) {
+        syncRound = aSyncRound;
+    }
+    
+        public static int getGPSStartTime() {
+        return RoundStart;
+    }
+
+    /**
+     * @param GPSStartTime the GPSStartTime to set
+     */
+    public static void setGPSStartTime(int GPSStartTime) {
+        RoundStart = GPSStartTime;
+    }
+
+    /**
+     * @return the ProcessTime
+     */
+    public static int getProcessTime() {
+        return RoundEnd;
+    }
+
+    /**
+     * @param ProcessTime the ProcessTime to set
+     */
+    public static void setProcessTime(int ProcessTime) {
+        RoundEnd = ProcessTime;
+    }
+
+
     private final File DataFile = new File("G:\\DPS数据处理\\DPS实验数据");
     private final String FileType = "dat";
     private static int APD1DelayTime;
     private static int APD2DelayTime;
     private static int GateTime;
+    private static int syncRound;
     private File SendTimeDataFile;
     private File ReceiveTimeDataFile;
     private File SendRandomDataFile;
     private File ReceiveRandomDataFile;
+    private static int RoundStart = 0;
+    private static int RoundEnd = 7000;
 
     /**
      * Creates new form DPSJFrame
@@ -79,6 +122,10 @@ public class DPSJFrame extends javax.swing.JFrame {
         initComponents();
         System.setOut(new GUIPrintStream(System.out, ResultPrint));
     }
+
+    /**
+     * @return the GPSStartTime
+     */
 
     public class GUIPrintStream extends PrintStream {
 
@@ -136,6 +183,12 @@ public class DPSJFrame extends javax.swing.JFrame {
         ReceiveRandomData = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         TimeSetting = new javax.swing.JButton();
+        jLabel3 = new javax.swing.JLabel();
+        SyncRoundText = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        roundStartTxt = new javax.swing.JTextField();
+        roundEndTxt = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -230,6 +283,21 @@ public class DPSJFrame extends javax.swing.JFrame {
             }
         });
 
+        jLabel3.setFont(new java.awt.Font("微软雅黑 Light", 0, 12)); // NOI18N
+        jLabel3.setText("SyncRound:");
+
+        jLabel4.setFont(new java.awt.Font("微软雅黑 Light", 0, 12)); // NOI18N
+        jLabel4.setText("RoundStart:");
+
+        jLabel10.setFont(new java.awt.Font("微软雅黑 Light", 0, 12)); // NOI18N
+        jLabel10.setText("RoundEnd:");
+
+        roundStartTxt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                roundStartTxtActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -242,24 +310,6 @@ public class DPSJFrame extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(200, 200, 200)
                         .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(APD1Delay, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(APD2Delay, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(DataProcess))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(TimeGate, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(77, 77, 77)
-                        .addComponent(TimeSetting))
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
@@ -270,7 +320,40 @@ public class DPSJFrame extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(ReceiveTimeData)
                         .addGap(18, 18, 18)
-                        .addComponent(ReceiveRandomData)))
+                        .addComponent(ReceiveRandomData))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(10, 10, 10)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addGap(18, 18, 18)
+                                .addComponent(SyncRoundText, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(APD1Delay, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(26, 26, 26)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(DataProcess)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                            .addComponent(APD2Delay, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)
+                                            .addComponent(roundStartTxt))
+                                        .addGap(18, 18, 18)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(jLabel10)
+                                            .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                            .addComponent(jLabel4))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(roundEndTxt, javax.swing.GroupLayout.DEFAULT_SIZE, 78, Short.MAX_VALUE)
+                            .addComponent(TimeGate))
+                        .addGap(73, 73, 73)
+                        .addComponent(TimeSetting)))
                 .addContainerGap(118, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -278,26 +361,44 @@ public class DPSJFrame extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(26, 26, 26)
                 .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(SendTimeData, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(SendRandomData, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(ReceiveTimeData, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(ReceiveRandomData, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(45, 45, 45)
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(2, 2, 2)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(APD1Delay)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(APD2Delay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(TimeGate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(TimeSetting, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(41, 41, 41)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(26, 26, 26)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(SendTimeData, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(SendRandomData, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(ReceiveTimeData, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(ReceiveRandomData, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(45, 45, 45)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(3, 3, 3)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(APD1Delay)
+                                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(APD2Delay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(TimeGate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel3)
+                                    .addComponent(SyncRoundText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(24, 24, 24)
+                                .addComponent(TimeSetting, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel10)
+                            .addComponent(roundStartTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(roundEndTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(17, 17, 17)
                 .addComponent(DataProcess, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(21, 21, 21)
                 .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -381,8 +482,12 @@ public class DPSJFrame extends javax.swing.JFrame {
         setAPD1DelayTime(Integer.parseInt(APD1Delay.getText()));
         setAPD2DelayTime(Integer.parseInt(APD2Delay.getText()));
         setGateTime(Integer.parseInt(TimeGate.getText()));
-        System.out.println("APD1DelayTime: " + getAPD1DelayTime() + "\t" + "APD2DelayTime: " + getAPD2DelayTime() + "\t" + "GateTime: " + getGateTime());
-        ResultPrint.append("APD1DelayTime: " + getAPD1DelayTime() + "\t" + "APD2DelayTime: " + getAPD2DelayTime() + "\t" + "GateTime: " + getGateTime() + "\n");
+        setSyncRound(Integer.parseInt(SyncRoundText.getText()));
+        setGPSStartTime(Integer.parseInt(roundStartTxt.getText()));
+        setProcessTime(Integer.parseInt(roundEndTxt.getText()));
+        System.out.println("APD1DelayTime: " + getAPD1DelayTime() + "\t" + "APD2DelayTime: " + getAPD2DelayTime() + "\t" + "GateTime: " 
+                + getGateTime()+"SyncRound\t" +getSyncRound()+"StartRound\t" +getGPSStartTime()+"EndRound\t" +getProcessTime()+"\n");
+        ResultPrint.append("APD1DelayTime: " + getAPD1DelayTime() + "\t" + "APD2DelayTime: " + getAPD2DelayTime() + "\t" + "GateTime: " + getGateTime() +"SyncRound\t" +getSyncRound()+"\n");
     }//GEN-LAST:event_TimeSettingActionPerformed
 
     private void DataProcessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DataProcessActionPerformed
@@ -391,10 +496,14 @@ public class DPSJFrame extends javax.swing.JFrame {
         ResultPrint.append("Processing...");
         try {
 
-            Process.TimeData(getSendTimeDataFile(), getReceiveTimeDataFile(), getSendRandomDataFile(), getReceiveRandomDataFile(), getAPD1DelayTime(), getAPD2DelayTime(), getGateTime());
+            Process.TimeData(getSendTimeDataFile(), getReceiveTimeDataFile(), getSendRandomDataFile(), getReceiveRandomDataFile(), getAPD1DelayTime(), getAPD2DelayTime(), getGateTime(), getGPSStartTime(), getProcessTime(),getSyncRound());
         } catch (Exception e) {
         };
     }//GEN-LAST:event_DataProcessActionPerformed
+
+    private void roundStartTxtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_roundStartTxtActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_roundStartTxtActionPerformed
 
     /**
      * @param args the command line arguments
@@ -441,16 +550,22 @@ public class DPSJFrame extends javax.swing.JFrame {
     private javax.swing.JTextArea ResultPrint;
     private javax.swing.JButton SendRandomData;
     private javax.swing.JButton SendTimeData;
+    private javax.swing.JTextField SyncRoundText;
     private javax.swing.JTextField TimeGate;
     private javax.swing.JButton TimeSetting;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextField roundEndTxt;
+    private javax.swing.JTextField roundStartTxt;
     // End of variables declaration//GEN-END:variables
 
     /**
