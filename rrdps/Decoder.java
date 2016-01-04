@@ -27,8 +27,8 @@ public class Decoder {
             int pulseIndex = tag.getPulseIndex();
             int decode = tag.getCode();
             long apdtime = tag.getApdTime();
-            if (roundIndex>=aliceQRNG.size()||roundIndex>=bobQRNG.size()){
-                System.out.println("roundIndex "+roundIndex);
+            if (roundIndex >= aliceQRNG.size() || roundIndex >= bobQRNG.size()) {
+                System.out.println("roundIndex " + roundIndex);
                 break;
             }
 //            System.out.println((aliceQRNG.get(roundIndex).getTime()-bobQRNG.get(roundIndex).getTime()));
@@ -37,10 +37,10 @@ public class Decoder {
             int delay = decodingRandom.getDelay();
             int encode = encodingRandom.getEncode(pulseIndex, delay);
             if (encode >= 0) {
-                Entry entry = new Entry(roundIndex, pulseIndex, encode, decode,apdtime);
+                Entry entry = new Entry(roundIndex, pulseIndex, encode, decode, apdtime);
                 result.add(entry);
             }
-            }
+        }
         return result;
     }
 
@@ -52,12 +52,12 @@ public class Decoder {
         private final int decode;
         private final long APDTime;
 
-        private Entry(int roundIndex, int pulseIndex, int encode, int decode,long APDTime) {
+        private Entry(int roundIndex, int pulseIndex, int encode, int decode, long APDTime) {
             this.roundIndex = roundIndex;
             this.pulseIndex = pulseIndex;
             this.encode = encode;
             this.decode = decode;
-            this.APDTime=APDTime;
+            this.APDTime = APDTime;
         }
 
         public int getRoundIndex() {

@@ -12,19 +12,26 @@ import java.util.ArrayList;
 public class Process {
 
     public static void main(String[] args) throws IOException, DeviceException {
-        String id = "20150301222829";
-        File path = new File("G:\\DPS数据处理\\DPS实验数据\\2015-3-1");
-        long delay1 =2495780300l;
-        long delay2 =2495774400l;
-        Experiment experiment = new Experiment(id, path);
+        String id = "20151105230413";
+        String index = "1";
+        File path = new File("G:\\unpack");
+        long delay1 = 2389900l;
+        long delay2 = 2378900l;
+        Experiment experiment = new Experiment(id, index, path);
+        experiment.setMask((byte) 0x00);
         experiment.loadData();
+        System.out.println("load data finshed!");
         experiment.sync(delay1, delay2);
+        System.out.println("sync finshed!");
         experiment.filterAndMerge(1000, 258000);
+        System.out.println("merge finshed!");
         ArrayList<Decoder.Entry> result = experiment.decoding(800);
+        System.out.println("decode finshed!");
         ResultParser resultParser = new ResultParser(result);
         resultParser.ResultOutFile(result, id);
         resultParser.ResultStatistics(result, id);
-//        experiment.test();
- 
+       // resultParser.ResultbyGate(result, experiment.getBobQRNGList(), id);
+        experiment.test();
+
     }
 }

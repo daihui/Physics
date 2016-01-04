@@ -2,6 +2,7 @@ package com.hwaipy.rrdps;
 
 import com.hwaipy.unifieddeviceinterface.timeeventdevice.TimeEvent;
 import com.hwaipy.unifieddeviceinterface.timeeventdevice.timeeventcontainer.TimeEventList;
+import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -53,7 +54,14 @@ public class Tagger {
                 int pulseIndex = (int)tagResult[0];
                 long apdTime = tagResult[1];
                 if (pulseIndex >= 0) {
+                    if(random.getAPDFlag()==0){
                     result.add(new Entry(roundIndex, pulseIndex, event.getChannel() - 2,apdTime));
+                    }else if(random.getAPDFlag()==1){
+                    result.add(new Entry(roundIndex, pulseIndex, Math.abs(event.getChannel() - 3),apdTime));    
+                    }else {
+                        System.out.println("APDFlag Error !");
+                    }
+              
                 }
                 event = null;
             }
